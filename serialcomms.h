@@ -371,21 +371,21 @@ void ser_comms() {
 #if defined(DISPLAYTYPE)
 #if (DISPLAYTYPE == DISPLAY_LCD1602) || (DISPLAYTYPE == DISPLAY_LCD1604) || (DISPLAYTYPE == DISPLAY_LCD2004)
         if (myfocuser.display_enabled) {
-        // Set the text color to white
-        _Display->display();
-        _Display->backlight();
-      } else {
-        // disable the screen by setting clearing the screen and then the text color to black
-        // clear the screen
-        _Display->noDisplay();
-        _Display->noBacklight();
-      }
+          // Set the text color to white
+          _Display->display();
+          _Display->backlight();
+        } else {
+          // disable the screen by setting clearing the screen and then the text color to black
+          // clear the screen
+          _Display->noDisplay();
+          _Display->noBacklight();
+        }
 #elif (DISPLAYTYPE == DISPLAY_OLED12864)
-      if (myfocuser.display_enabled) {
-        _Display->Display_On();
-      } else {
-        _Display->Display_Off();
-      }
+        if (myfocuser.display_enabled) {
+          _Display->Display_On();
+        } else {
+          _Display->Display_Off();
+        }
 #endif
 #endif
         writenow = 1;
