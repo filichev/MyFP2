@@ -104,6 +104,11 @@ enum btnval { Inbtn,
               Nobtn };
 btnval btn;
 
+#if defined(PUSHBUTTONS)
+#define PB_LONGPRESS_THRESHOLD 1000  // milliseconds for long-press detection
+byte pb_boost = 0;                   // push button speed boost flag (0=off, 1=on)
+#endif
+
 
 //-----------------------------------------------------------------------
 // GLOBAL DATA - DO NOT CHANGE
@@ -317,9 +322,47 @@ btnval readpushbuttons(void) {
 // -----------------------------------------------------------------------
 void updatepushbuttons(void) {
 #if defined(PUSHBUTTONS)
+  static btnval heldBtn = Nobtn;       // track which button is held
+  static unsigned long holdStart = 0;   // when button hold started
+  
   btn = readpushbuttons();
   delay(5);
   if (readpushbuttons() == btn) {
+    // Check for long-press on IN or OUT buttons
+    if (btn == Inbtn || btn == Outbtn) {
+      if (heldBtn == btn) {
+        // Same button still held, check if long-press threshold reached
+        if (pb_boost == 0 && (millis() - holdStart) >= PB_LONGPRESS_THRESHOLD) {
+          pb_boost = 1;  // Enable speed boost
+        }
+      } else {
+        // New button pressed, start tracking
+        heldBtn = btn;
+        holdStart = millis();
+      }
+    } else if (btn == Bothbtn) {
+      // Both buttons pressed - clear boost and handle as before
+      pb_boost = 0;
+      heldBtn = Nobtn;
+#if defined(BUZZER)
+      digitalWrite(BUZZERPIN, 1);  // turn on buzzer
+#endif
+      while (readpushbuttons() == Bothbtn)  // wait for pb to be released
+        ;
+      fcurrentposition = 0;
+      ftargetposition = 0;
+#if defined(DISPLAYTYPE)
+      if ( myfocuser.display_enabled == 1) {
+        DisplayUpdatePosition();
+      }
+#endif
+      return;
+    } else {
+      // Nobtn - button released, clear boost
+      pb_boost = 0;
+      heldBtn = Nobtn;
+    }
+    
     switch (btn) {
       case Inbtn:
         ftargetposition = ftargetposition - myfocuser.pbsteps;
@@ -329,17 +372,11 @@ void updatepushbuttons(void) {
         ftargetposition = ftargetposition + myfocuser.pbsteps;
         ftargetposition = (ftargetposition > myfocuser.maxstep) ? myfocuser.maxstep : ftargetposition;
         break;
-      case Bothbtn:
-#if defined(BUZZER)
-        digitalWrite(BUZZERPIN, 1);  // turn on buzzer
-#endif
-        while (readpushbuttons() == Bothbtn)  // wait for pb to be released
-          ;
-        fcurrentposition = 0;
-        ftargetposition = 0;
-        break;
       case Nobtn:
         //
+        break;
+      case Bothbtn:
+        // Already handled above
         break;
     }
 #if defined(DISPLAYTYPE)
