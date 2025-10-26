@@ -199,9 +199,11 @@ void ser_comms() {
       break;
 
     case 12:  // Set coil power
-      myfocuser.coilpower = (byte) WorkString[0] - '0';
-      (myfocuser.coilpower == 1) ? driverboard->set_motorpower(true) : driverboard->set_motorpower(false);
-      writenow = 1;
+      if (WorkString.length() > 0) {
+        myfocuser.coilpower = (byte) WorkString[0] - '0';
+        (myfocuser.coilpower == 1) ? driverboard->set_motorpower(true) : driverboard->set_motorpower(false);
+        writenow = 1;
+      }
       break;
 
     case 13:  // Get reverse direction setting, 0 off, 1 on
@@ -210,8 +212,10 @@ void ser_comms() {
 
     case 14:  // Set reverse direction
       if (isMoving == 0) {
-        myfocuser.reversedirection = (byte) WorkString[0] - '0';
-        writenow = 1;
+        if (WorkString.length() > 0) {
+          myfocuser.reversedirection = (byte) WorkString[0] - '0';
+          writenow = 1;
+        }
       }
       break;
 
@@ -233,8 +237,10 @@ void ser_comms() {
     case 18:
       // :180#    None    set the return of user specified stepsize to be OFF - default
       // :181#    None    set the return of user specified stepsize to be ON - reports what user specified as stepsize
-      myfocuser.stepsizeenabled = (byte) WorkString[0] - '0';
-      writenow = 1;
+      if (WorkString.length() > 0) {
+        myfocuser.stepsizeenabled = (byte) WorkString[0] - '0';
+        writenow = 1;
+      }
       break;
 
     case 19:  // Set the step size value - double type, eg 2.1
@@ -275,8 +281,10 @@ void ser_comms() {
 
     case 23:  // Set the temperature compensation state, ON (1) or OFF (0)
       if (tprobe1 != 0) {
-        tempcompstate = (byte)WorkString[0] - '0';
-        writenow = 1;
+        if (WorkString.length() > 0) {
+          tempcompstate = (byte)WorkString[0] - '0';
+          writenow = 1;
+        }
       }
       break;
 
@@ -358,10 +366,11 @@ void ser_comms() {
     case 36:
       // :360#    None    Disable Display
       // :361#    None    Enable Display
-      myfocuser.display_enabled = (byte)WorkString[0] - '0';
+      if (WorkString.length() > 0) {
+        myfocuser.display_enabled = (byte)WorkString[0] - '0';
 #if defined(DISPLAYTYPE)
 #if (DISPLAYTYPE == DISPLAY_LCD1602) || (DISPLAYTYPE == DISPLAY_LCD1604) || (DISPLAYTYPE == DISPLAY_LCD2004)
-      if (myfocuser.display_enabled) {
+        if (myfocuser.display_enabled) {
         // Set the text color to white
         _Display->display();
         _Display->backlight();
@@ -379,7 +388,8 @@ void ser_comms() {
       }
 #endif
 #endif
-      writenow = 1;
+        writenow = 1;
+      }
       break;
 
     case 37:  // Get displaystatus
@@ -500,8 +510,10 @@ void ser_comms() {
       //break;
 
     case 61:  // Set update of position on lcd when moving (0=disable, 1=enable)
-      myfocuser.display_updateonmove = WorkString[0] - '0';
-      writenow = 1;
+      if (WorkString.length() > 0) {
+        myfocuser.display_updateonmove = WorkString[0] - '0';
+        writenow = 1;
+      }
       break;
 
     case 62:  // Get update of position on lcd when moving (0=disable, 1=enable)
@@ -535,8 +547,10 @@ void ser_comms() {
 
     case 65:  // Set jogging state enable/disable
       if (stepperpower == 1) {
-        jogging = (byte)WorkString[0] - '0';
-        writenow = 1;
+        if (WorkString.length() > 0) {
+          jogging = (byte)WorkString[0] - '0';
+          writenow = 1;
+        }
       }
       break;
 
@@ -546,8 +560,10 @@ void ser_comms() {
 
     case 67:  // Set jogging direction, 0=IN, 1=OUT
       if (stepperpower == 1) {
-        joggingDirection = (byte)WorkString[0] - '0';
-        writenow = 1;
+        if (WorkString.length() > 0) {
+          joggingDirection = (byte)WorkString[0] - '0';
+          writenow = 1;
+        }
       }
       break;
 
@@ -574,8 +590,10 @@ void ser_comms() {
       break;
 
     case 73:  // Set Disable/enable backlash IN (going to lower focuser position)
-      myfocuser.backlash_in_enabled = (byte)WorkString[0] - '0';
-      writenow = 1;
+      if (WorkString.length() > 0) {
+        myfocuser.backlash_in_enabled = (byte)WorkString[0] - '0';
+        writenow = 1;
+      }
       break;
 
     case 74:  // Get backlash in enabled status
@@ -583,8 +601,10 @@ void ser_comms() {
       break;
 
     case 75:  // Set Disable/enable backlash OUT (going to lower focuser position)
-      myfocuser.backlash_out_enabled = (byte)WorkString[0] - '0';
-      writenow = 1;
+      if (WorkString.length() > 0) {
+        myfocuser.backlash_out_enabled = (byte)WorkString[0] - '0';
+        writenow = 1;
+      }
       break;
 
     case 76:  // Get backlash OUT enabled status
@@ -638,8 +658,10 @@ void ser_comms() {
       break;
 
     case 88:  // Set tc direction
-      myfocuser.tcdirection = (byte)WorkString[0] - '0';
-      writenow = 1;
+      if (WorkString.length() > 0) {
+        myfocuser.tcdirection = (byte)WorkString[0] - '0';
+        writenow = 1;
+      }
       break;
 
     case 89:  // Get stepper power
@@ -737,7 +759,9 @@ void serialEvent() {
         queue.push(line);
         break;
       default:  // anything else
-        line = line + inChar;
+        if (line.length() < 255) {  // prevent buffer overflow
+          line = line + inChar;
+        }
         break;
     }
   }
@@ -770,7 +794,9 @@ void btSerialEvent() {
         queue.push(btline);
         break;
       default:  // anything else
-        btline = btline + inChar;
+        if (btline.length() < 255) {  // prevent buffer overflow
+          btline = btline + inChar;
+        }
         break;
     }
   }
