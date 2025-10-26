@@ -39,7 +39,7 @@ extern byte MainStateMachine;
 extern byte movedirection;  // holds direction of new planned move
 extern DriverBoard* driverboard;
 
-#if defined(PUSHBUTTONS)
+#if defined(PUSHBUTTONS) && defined(PB_SPEED_BOOST)
 extern byte pb_boost;  // push button speed boost flag
 #endif
 
@@ -336,13 +336,13 @@ int DriverBoard::get_stepdelay(void) {
       break;
   }
   
-#if defined(PUSHBUTTONS)
-  // Apply 10x speed boost if long-press detected
+#if defined(PUSHBUTTONS) && defined(PB_SPEED_BOOST)
+  // Apply speed boost if long-press detected
   if (pb_boost == 1) {
-    sdelay = sdelay / 10;
-    // Enforce minimum delay floor of 800 microseconds
-    if (sdelay < 800) {
-      sdelay = 800;
+    sdelay = sdelay / PB_SPEED_BOOST_MULTIPLIER;
+    // Enforce minimum delay floor
+    if (sdelay < PB_BOOST_MIN_DELAY_US) {
+      sdelay = PB_BOOST_MIN_DELAY_US;
     }
   }
 #endif
