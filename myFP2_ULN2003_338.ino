@@ -104,8 +104,7 @@ enum btnval { Inbtn,
               Nobtn };
 btnval btn;
 
-#if defined(PUSHBUTTONS)
-#define PB_LONGPRESS_THRESHOLD 1000  // milliseconds for long-press detection
+#if defined(PUSHBUTTONS) && defined(PB_SPEED_BOOST)
 byte pb_boost = 0;                   // push button speed boost flag (0=off, 1=on)
 #endif
 
@@ -322,17 +321,20 @@ btnval readpushbuttons(void) {
 // -----------------------------------------------------------------------
 void updatepushbuttons(void) {
 #if defined(PUSHBUTTONS)
+#if defined(PB_SPEED_BOOST)
   static btnval heldBtn = Nobtn;       // track which button is held
   static unsigned long holdStart = 0;   // when button hold started
+#endif
   
   btn = readpushbuttons();
   delay(5);
   if (readpushbuttons() == btn) {
+#if defined(PB_SPEED_BOOST)
     // Check for long-press on IN or OUT buttons
     if (btn == Inbtn || btn == Outbtn) {
       if (heldBtn == btn) {
         // Same button still held, check if long-press threshold reached
-        if (pb_boost == 0 && (millis() - holdStart) >= PB_LONGPRESS_THRESHOLD) {
+        if (pb_boost == 0 && (millis() - holdStart) >= PB_LONGPRESS_MS) {
           pb_boost = 1;  // Enable speed boost
         }
       } else {
@@ -362,6 +364,24 @@ void updatepushbuttons(void) {
       pb_boost = 0;
       heldBtn = Nobtn;
     }
+#else
+    // No speed boost - handle Bothbtn case
+    if (btn == Bothbtn) {
+#if defined(BUZZER)
+      digitalWrite(BUZZERPIN, 1);  // turn on buzzer
+#endif
+      while (readpushbuttons() == Bothbtn)  // wait for pb to be released
+        ;
+      fcurrentposition = 0;
+      ftargetposition = 0;
+#if defined(DISPLAYTYPE)
+      if ( myfocuser.display_enabled == 1) {
+        DisplayUpdatePosition();
+      }
+#endif
+      return;
+    }
+#endif
     
     switch (btn) {
       case Inbtn:

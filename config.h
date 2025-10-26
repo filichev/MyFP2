@@ -87,6 +87,19 @@
 // then the push buttons will not move the focuser.
 //#define PB_STEPS 1
 
+// Push button long-press speed boost settings
+// To disable the speed boost feature, comment out the next line
+//#define PB_SPEED_BOOST 1
+
+// To specify the hold time threshold in milliseconds before the speed boost activates
+//#define PB_LONGPRESS_MS 1000
+
+// To specify the speed multiplier during boost (higher = faster)
+//#define PB_SPEED_BOOST_MULTIPLIER 10
+
+// To specify the minimum step delay in microseconds during boost (safety floor)
+//#define PB_BOOST_MIN_DELAY_US 800
+
 // This prevents the stepper motor moving when 12V to the stepper is OFF - needs special circuitry or has no effect
 // To enable the 12V power detect to the stepper motor, uncomment the next line  (only available on some boards)
 //#define STEPPERPWRDETECT 1
@@ -171,6 +184,26 @@
 #if !defined(PB_STEPS)
 #define PB_STEPS 1
 #endif 
+
+// PB SPEED BOOST
+#if !defined(PB_SPEED_BOOST)
+#define PB_SPEED_BOOST 1
+#endif
+
+// PB LONGPRESS MS
+#if !defined(PB_LONGPRESS_MS)
+#define PB_LONGPRESS_MS 1000
+#endif
+
+// PB SPEED BOOST MULTIPLIER
+#if !defined(PB_SPEED_BOOST_MULTIPLIER)
+#define PB_SPEED_BOOST_MULTIPLIER 10
+#endif
+
+// PB BOOST MIN DELAY US
+#if !defined(PB_BOOST_MIN_DELAY_US)
+#define PB_BOOST_MIN_DELAY_US 800
+#endif
 
 
 // PCB: BT.BUZZ.LEDs.LCD.OLED.HPSW.PB.TMP.SPWR
